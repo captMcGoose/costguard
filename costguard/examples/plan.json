@@ -1,0 +1,46 @@
+{
+  "resource_changes": [
+    {
+      "address": "aws_db_instance.prod_db",
+      "mode": "managed",
+      "type": "aws_db_instance",
+      "name": "prod_db",
+      "change": { "actions": ["create"] }
+    },
+    {
+      "address": "aws_nat_gateway.main",
+      "mode": "managed",
+      "type": "aws_nat_gateway",
+      "name": "main",
+      "change": { "actions": ["create"] }
+    },
+    {
+      "address": "aws_ebs_volume.data",
+      "mode": "managed",
+      "type": "aws_ebs_volume",
+      "name": "data",
+      "change": { "actions": ["update"] }
+    },
+    {
+      "address": "aws_instance.worker",
+      "mode": "managed",
+      "type": "aws_instance",
+      "name": "worker",
+      "change": { "actions": ["delete", "create"] }
+    },
+    {
+      "address": "aws_instance.old_worker",
+      "mode": "managed",
+      "type": "aws_instance",
+      "name": "old_worker",
+      "change": { "actions": ["delete"] }
+    },
+    {
+      "address": "aws_custom.unknown_action",
+      "mode": "managed",
+      "type": "aws_custom",
+      "name": "unknown_action",
+      "change": { "actions": ["foo"] }
+    }
+  ]
+}
