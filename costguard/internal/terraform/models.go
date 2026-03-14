@@ -18,8 +18,9 @@ type TerraformChange struct {
 
 // Simplified internal model used by the rest of the CLI
 type ResourceChange struct {
-	Address string
-	Type    string
-	Name    string
-	Action  string // normalized: create, update, delete, replace, unknown
+	Address    string
+	Type       string
+	Name       string
+	Action     string // normalized: create, update, delete, replace, unknown
+	Attributes map[string]interface{}
 }

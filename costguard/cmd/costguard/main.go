@@ -6,6 +6,7 @@ import (
     "path/filepath"
     "strings"
 
+    "github.com/captMcGoose/costguard/internal/pricing"
     "github.com/captMcGoose/costguard/internal/terraform"
 )
 
@@ -37,6 +38,22 @@ func main() {
         fmt.Println("Detected resource changes:")
         for _, r := range rcs {
             fmt.Printf("%-7s %s\n", strings.ToUpper(r.Action), r.Address)
+        }
+
+        summary := pricing.CalculateCostDiff(rcs)
+        sign := "+"
+        if summary.TotalMonthly < 0 {
+            sign = "-"
+        }
+        fmt.Printf("\nEstimated monthly cost change: %s$%.0f\n", sign, summary.TotalMonthly)
+
+        if len(summary.Drivers) > 0 {
+            fmt.Println("\nTop cost drivers:")
+            for _, d := range summary.Drivers {
+                fmt.Printf("+ %s → $%.0f/month\n", d.Address, d.MonthlyCost)
+            }
+        } else {
+            fmt.Println("\nTop cost drivers: pricing unavailable")
         }
     default:
         usage()

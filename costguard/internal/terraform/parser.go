@@ -23,7 +23,8 @@ func ParsePlanFile(path string) ([]ResourceChange, error) {
 		Name    string `json:"name"`
 		Mode    string `json:"mode"`
 		Change  struct {
-			Actions []string `json:"actions"`
+			Actions []string               `json:"actions"`
+			After   map[string]interface{} `json:"after"`
 		} `json:"change"`
 	}
 
@@ -51,10 +52,11 @@ func ParsePlanFile(path string) ([]ResourceChange, error) {
 
 		action := normalizeAction(rc.Change.Actions)
 		out = append(out, ResourceChange{
-			Address: rc.Address,
-			Type:    rc.Type,
-			Name:    rc.Name,
-			Action:  action,
+			Address:    rc.Address,
+			Type:       rc.Type,
+			Name:       rc.Name,
+			Action:     action,
+			Attributes: rc.Change.After,
 		})
 	}
 

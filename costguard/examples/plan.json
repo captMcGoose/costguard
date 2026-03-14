@@ -5,7 +5,10 @@
       "mode": "managed",
       "type": "aws_db_instance",
       "name": "prod_db",
-      "change": { "actions": ["create"] }
+      "change": { 
+        "actions": ["create"],
+        "after": { "instance_class": "db.m6i.large" }
+      }
     },
     {
       "address": "aws_nat_gateway.main",
@@ -19,14 +22,20 @@
       "mode": "managed",
       "type": "aws_ebs_volume",
       "name": "data",
-      "change": { "actions": ["update"] }
+      "change": { 
+        "actions": ["update"],
+        "after": { "size": 100 }
+      }
     },
     {
       "address": "aws_instance.worker",
       "mode": "managed",
       "type": "aws_instance",
       "name": "worker",
-      "change": { "actions": ["delete", "create"] }
+      "change": { 
+        "actions": ["delete", "create"],
+        "after": { "instance_type": "t3.micro" }
+      }
     },
     {
       "address": "aws_instance.old_worker",
