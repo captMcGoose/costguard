@@ -6,7 +6,9 @@ import (
     "path/filepath"
     "strings"
 
+    "github.com/captMcGoose/costguard/internal/github"
     "github.com/captMcGoose/costguard/internal/pricing"
+    "github.com/captMcGoose/costguard/internal/report"
     "github.com/captMcGoose/costguard/internal/terraform"
 )
 
@@ -54,6 +56,20 @@ func main() {
             }
         } else {
             fmt.Println("\nTop cost drivers: pricing unavailable")
+        }
+
+        reportBody := report.GenerateMarkdownReport(rcs, summary)
+        owner, repo, prNumber, prErr := github.DetectPullRequest()
+        if prErr == nil {
+            if err := github.PostPRComment(owner, repo, prNumber, reportBody); err != nil {
+                fmt.Fprintf(os.Stderr, "warning: failed to post PR comment: %v\n", err)
+            } else {
+                fmt.Println("Posted cost report to GitHub PR comment.")
+            }
+        } else {
+            fmt.Println("PR report mode not available:", prErr)
+            fmt.Println("Generated report:")
+            fmt.Println(reportBody)
         }
     default:
         usage()

@@ -9,6 +9,15 @@ Week 1 MVP:
 - Detect changed resources
 - Print resource actions
 
+Week 2:
+- Estimate monthly AWS costs for supported resources
+- Print cost diff and top drivers
+
+Week 3:
+- Generate markdown cost report
+- Detect GitHub PR environment
+- Post PR comment with report using GITHUB_TOKEN
+
 ## Run
 
 To analyze a Terraform plan JSON file, use the following command:
