@@ -11,11 +11,12 @@ runs:
   using: "composite"
   steps:
     - name: Build CostGuard CLI
-      run: |
-        go build -o "$GITHUB_ACTION_PATH/costguard" "$GITHUB_ACTION_PATH/cmd/costguard"
       shell: bash
+      run: |
+        cd "$GITHUB_ACTION_PATH"
+        go build -o costguard ./cmd/costguard
 
     - name: Run CostGuard
+      shell: bash
       run: |
         "$GITHUB_ACTION_PATH/costguard" analyze "${{ inputs.plan-file }}"
-      shell: bash
