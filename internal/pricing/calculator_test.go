@@ -48,7 +48,7 @@ func TestCalculateCostDiff(t *testing.T) {
         {Address: "aws_instance.worker", Type: "aws_instance", Action: "replace", Attributes: map[string]interface{}{"instance_type": "t3.micro"}},
     }
 
-    summary := CalculateCostDiff(changes)
+    summary := CalculateCostDiff(changes, false)
     if summary.TotalMonthly <= 0 {
         t.Fatalf("expected positive total monthly cost, got %v", summary.TotalMonthly)
     }

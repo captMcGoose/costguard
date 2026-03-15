@@ -22,7 +22,7 @@ func TestGenerateMarkdownReport(t *testing.T) {
     }
 
     out := GenerateMarkdownReport(changes, summary)
-    if !strings.Contains(out, "## CostGuard Estimate") {
+    if !strings.Contains(out, "## 💰 CostGuard Estimate") {
         t.Fatal("report missing header")
     }
     if !strings.Contains(out, "aws_db_instance.prod_db") || !strings.Contains(out, "aws_nat_gateway.main") {

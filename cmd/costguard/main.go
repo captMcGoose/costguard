@@ -1,16 +1,18 @@
 package main
 
 import (
+    "flag"
     "fmt"
     "os"
     "path/filepath"
-    "strings"
 
     "github.com/captMcGoose/costguard/internal/github"
     "github.com/captMcGoose/costguard/internal/pricing"
     "github.com/captMcGoose/costguard/internal/report"
     "github.com/captMcGoose/costguard/internal/terraform"
 )
+
+const version = "v1.0.0"
 
 func main() {
     if len(os.Args) < 2 {
@@ -21,44 +23,59 @@ func main() {
     cmd := os.Args[1]
     switch cmd {
     case "analyze":
-        if len(os.Args) != 3 {
-            fmt.Fprintln(os.Stderr, "usage: costguard analyze <path-to-plan.json>")
+        fs := flag.NewFlagSet("analyze", flag.ContinueOnError)
+        debug := fs.Bool("debug", false, "enable debug logs")
+        if err := fs.Parse(os.Args[2:]); err != nil {
+            fmt.Fprintln(os.Stderr, "usage: costguard analyze [--debug] <path-to-plan.json>")
             os.Exit(2)
         }
-        path := os.Args[2]
+
+        args := fs.Args()
+        if len(args) != 1 {
+            fmt.Fprintln(os.Stderr, "usage: costguard analyze [--debug] <path-to-plan.json>")
+            os.Exit(2)
+        }
+
+        path := args[0]
         abs, err := filepath.Abs(path)
         if err == nil {
             path = abs
         }
+
         rcs, err := terraform.ParsePlanFile(path)
         if err != nil {
-            fmt.Fprintf(os.Stderr, "error: %v\n", err)
+            if os.IsNotExist(err) {
+                fmt.Fprintf(os.Stderr, "Error: missing plan file %q\n", path)
+            } else {
+                fmt.Fprintf(os.Stderr, "Error: unable to parse Terraform plan file: %v\n", err)
+            }
             os.Exit(1)
         }
 
-        // print header (remove redundant '\n' to satisfy vet)
-        fmt.Println("Detected resource changes:")
-        for _, r := range rcs {
-            fmt.Printf("%-7s %s\n", strings.ToUpper(r.Action), r.Address)
-        }
+        summary := pricing.CalculateCostDiff(rcs, *debug)
 
-        summary := pricing.CalculateCostDiff(rcs)
         sign := "+"
-        if summary.TotalMonthly < 0 {
+        total := summary.TotalMonthly
+        if total < 0 {
             sign = "-"
+            total = -total
         }
-        fmt.Printf("\nEstimated monthly cost change: %s$%.0f\n", sign, summary.TotalMonthly)
+        fmt.Println("💰 CostGuard Estimate")
+        fmt.Println("")
+        fmt.Printf("Estimated Monthly Cost Impact: %s$%.0f/month\n\n", sign, total)
 
-        if len(summary.Drivers) > 0 {
-            fmt.Println("\nTop cost drivers:")
-            for _, d := range summary.Drivers {
-                fmt.Printf("+ %s → $%.0f/month\n", d.Address, d.MonthlyCost)
-            }
+        fmt.Println("Top Cost Drivers")
+        fmt.Println("----------------")
+        if len(summary.Drivers) == 0 {
+            fmt.Println("No supported resources found.")
         } else {
-            fmt.Println("\nTop cost drivers: pricing unavailable")
+            for _, d := range summary.Drivers {
+                fmt.Printf("%-25s $%.0f\n", d.Address, d.MonthlyCost)
+            }
         }
 
         reportBody := report.GenerateMarkdownReport(rcs, summary)
+
         owner, repo, prNumber, prErr := github.DetectPullRequest()
         if prErr == nil {
             if err := github.PostPRComment(owner, repo, prNumber, reportBody); err != nil {
@@ -71,6 +88,9 @@ func main() {
             fmt.Println("Generated report:")
             fmt.Println(reportBody)
         }
+
+    case "version":
+        fmt.Printf("CostGuard %s\n", version)
     default:
         usage()
         os.Exit(2)
@@ -79,5 +99,6 @@ func main() {
 
 func usage() {
     fmt.Fprintln(os.Stderr, "Usage:")
-    fmt.Fprintln(os.Stderr, "  costguard analyze <path-to-plan.json>")
+    fmt.Fprintln(os.Stderr, "  costguard analyze [--debug] <path-to-plan.json>")
+    fmt.Fprintln(os.Stderr, "  costguard version")
 }

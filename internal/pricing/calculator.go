@@ -70,21 +70,29 @@ func EstimateMonthlyCost(change terraform.ResourceChange, attrs map[string]inter
     }
 }
 
-func CalculateCostDiff(changes []terraform.ResourceChange) CostSummary {
+func CalculateCostDiff(changes []terraform.ResourceChange, debug bool) CostSummary {
     summary := CostSummary{}
     drivers := make([]CostDriver, 0, len(changes))
 
     for _, ch := range changes {
         if ch.Action == "delete" {
+            if debug {
+                fmt.Fprintf(os.Stderr, "skipping %s: delete action\n", ch.Address)
+            }
             continue
         }
 
         cost, err := EstimateMonthlyCost(ch, ch.Attributes)
         if err != nil {
-            fmt.Fprintf(os.Stderr, "skipping %s: %v\n", ch.Address, err)
+            if debug {
+                fmt.Fprintf(os.Stderr, "skipping %s: %v\n", ch.Address, err)
+            }
             continue
         }
         if cost <= 0 {
+            if debug {
+                fmt.Fprintf(os.Stderr, "skipping %s: zero cost\n", ch.Address)
+            }
             continue
         }
 

@@ -13,10 +13,16 @@ runs:
     - name: Build CostGuard CLI
       shell: bash
       run: |
+        set -euo pipefail
         cd "$GITHUB_ACTION_PATH"
+        echo "Building CostGuard..."
         go build -o costguard ./cmd/costguard
 
     - name: Run CostGuard
       shell: bash
       run: |
+        set -euo pipefail
+        echo "Running CostGuard analyze..."
         "$GITHUB_ACTION_PATH/costguard" analyze "${{ inputs.plan-file }}"
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
