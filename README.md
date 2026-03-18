@@ -1,4 +1,6 @@
 
+![CostGuard logo](docs/images/costguard-logo.png)
+
 # CostGuard
 
 **Prevent surprise cloud bills in Terraform pull requests.**
