@@ -3,6 +3,8 @@
 
 **Prevent surprise cloud bills in Terraform pull requests.**
 
+![CostGuard PR comment screenshot](docs/images/costguard-pr-screenshot.png)
+
 CostGuard analyzes Terraform infrastructure changes and comments the **estimated cloud cost impact directly on pull requests** before the changes are merged.
 
 It integrates with CI/CD pipelines (via GitHub Actions) and helps engineering teams **detect expensive infrastructure decisions early during code review**.
